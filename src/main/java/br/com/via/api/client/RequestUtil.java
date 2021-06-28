@@ -3,8 +3,6 @@ package br.com.via.api.client;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -20,7 +18,8 @@ public class RequestUtil<T1 extends Serializable, T2 extends Serializable> imple
 
 	private static final String AUTHORIZATION = "Authorization";
 	private static final long serialVersionUID = 1L;
-	private static final Logger LOGGER = Logger.getLogger(RequestUtil.class.getName());
+	// private static final Logger LOGGER =
+	// Logger.getLogger(RequestUtil.class.getName());
 	
 	private transient Client client;
 	private JsonConverter<T2> tratarRetorno;

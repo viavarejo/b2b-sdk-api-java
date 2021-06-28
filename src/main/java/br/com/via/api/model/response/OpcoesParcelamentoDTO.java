@@ -9,35 +9,30 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({
-    "data",
-    "error"
-})
-public class OpcoesParcelamentoDTO implements Serializable{
+@JsonPropertyOrder({ "data", "error" })
+public class OpcoesParcelamentoDTO implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
-	
+
 	@JsonProperty("data")
-    private List<OpcaoParcelamento> data = null;
-    @JsonProperty("error")
-    private Error error;
+	private List<OpcaoParcelamento> data = null;
+	@JsonProperty("error")
+	private Error error;
 
-    public List<OpcaoParcelamento> getData() {
-        return data;
-    }
+	public List<OpcaoParcelamento> getData() {
+		return data;
+	}
 
-    public void setData(List<OpcaoParcelamento> data) {
-        this.data = data;
-    }
+	public void setData(List<OpcaoParcelamento> data) {
+		this.data = data;
+	}
 
-    public Error getError() {
-        return error;
-    }
+	public Error getError() {
+		return error;
+	}
 
-    public void setError(Error error) {
-        this.error = error;
-    }
-
+	public void setError(Error error) {
+		this.error = error;
+	}
 
 }

@@ -12,10 +12,6 @@ public class DestinatarioDto implements Serializable {
 	private String inscricaoEstadual;
 	private String email;
 
-	public DestinatarioDto() {
-
-	}
-
 	public String getNome() {
 		return nome;
 	}

@@ -19,10 +19,6 @@ public class EnderecoEntregaDto implements Serializable {
 	private String telefone2;
 	private String telefone3;
 
-	public EnderecoEntregaDto() {
-
-	}
-
 	public String getCep() {
 		return cep;
 	}

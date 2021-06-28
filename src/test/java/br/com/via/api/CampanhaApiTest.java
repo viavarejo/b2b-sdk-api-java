@@ -1,21 +1,24 @@
 package br.com.via.api;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import br.com.via.api.client.ApiException;
 import br.com.via.api.model.response.CampanhasDTO;
 import br.com.via.api.model.response.FormasPagamentoDTO;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import static org.junit.Assert.*;
-
 public class CampanhaApiTest {
 	private static CampanhaApi campanhaApi;
-	Gson gson = new GsonBuilder().setPrettyPrinting().create();
+	private Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
 	@BeforeAll
 	public static void init() {

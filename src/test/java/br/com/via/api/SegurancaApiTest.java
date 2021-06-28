@@ -16,7 +16,7 @@ import br.com.via.api.model.response.ChaveDTO;
 
 public class SegurancaApiTest {
 	private static SegurancaApi segurancaApi;
-	Gson gson = new GsonBuilder().setPrettyPrinting().create();
+	private Gson gson = new GsonBuilder().setPrettyPrinting().create();
 	
 	@BeforeAll
 	public static void init() {

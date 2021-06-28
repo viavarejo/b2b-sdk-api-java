@@ -33,6 +33,7 @@ import br.com.via.api.model.request.PedidoCarrinho;
 import br.com.via.api.model.request.PedidoProdutoDto;
 import br.com.via.api.model.request.Produtos;
 import br.com.via.api.model.response.CalculoCarrinho;
+import br.com.via.api.model.response.ChaveDTO;
 import br.com.via.api.model.response.ConfirmacaoDTO;
 import br.com.via.api.model.response.CriacaoPedidoDTO;
 import br.com.via.api.model.response.PedidoParceiroData;
@@ -51,12 +52,6 @@ class PedidoApiTest {
 
 	/** Instancia do client API. */
 	private static PedidoApi pedidoApi;
-
-	/** Host do servico das Casas Bahia. */
-	// private static final String HOST_CASAS_BAHIA = "";
-
-	/** Host do servico do Ponto Frio. */
-	// private static final String HOST_PONTO = "";
 
 	/** CEP padrao dos testes */
 	private static final String CEP = "01525000";
@@ -91,6 +86,15 @@ class PedidoApiTest {
 	/** Numero de cartao de credito Master ficticio. */
 	private static final String NUMERO_CARTAO_MASTER = "5155901222280001";
 
+	/** Codigo verificador do cartao de credito Master ficticio. */
+	private static final String CODIGO_VERIFICADOR = "1234";
+
+	/** Ano de validade do cartao de credito Master ficticio. */
+	private static final String ANO_VALIDADE = "2045";
+
+	/** Mes de validade cartao de credito Master ficticio. */
+	private static final String MES_VALIDADE = "12";
+
 	/**
 	 * Atributo global utilizado para guardar o primeiro pedido criado para ser
 	 * utilizado nos demais testes.
@@ -101,7 +105,7 @@ class PedidoApiTest {
 	 * Atributo global utilizado para guardar o segundo pedido criado com Cartao
 	 * Credito para ser utilizado nos demais testes.
 	 */
-	private static DadosPedidoHelper pedidoHelperComCartao;
+	private static DadosPedidoHelper pedidoComCartaoHelper;
 
 	/**
 	 * Chave pública 2048 bits utilizada para criptografia dos dados do cartão.</br>
@@ -110,18 +114,25 @@ class PedidoApiTest {
 	 * http://api-integracao-casasbahia.hlg-b2b.net/swagger/ui/index#!/Seguranca/Seguranca_ObterChave
 	 *
 	 */
-	private static final String CHAVE_PUBLICA = "MIIENTCCAx2gAwIBAgIJAJ5ApEGl2oaIMA0GCSqGSIb3DQEBBQUAMIGwMQswCQYDVQQGEwJCUjELMAkGA1UECAwCU1AxFDASBgNVBAcMC1NBTyBDQUVUQU5PMRMwEQYDVQQKDApWSUEgVkFSRUpPMSAwHgYDVQQLDBdTRUdVUkFOQ0EgREEgSU5GT1JNQUNBTzEOMAwGA1UEAwwFUFJPWFkxNzA1BgkqhkiG9w0BCQEWKHRpLnNlZ3VyYW5jYS5pbmZvcm1hY2FvQHZpYXZhcmVqby5jb20uYnIwHhcNMTgwODE2MTIzNjQ2WhcNMjEwODE1MTIzNjQ2WjCBsDELMAkGA1UEBhMCQlIxCzAJBgNVBAgMAlNQMRQwEgYDVQQHDAtTQU8gQ0FFVEFOTzETMBEGA1UECgwKVklBIFZBUkVKTzEgMB4GA1UECwwXU0VHVVJBTkNBIERBIElORk9STUFDQU8xDjAMBgNVBAMMBVBST1hZMTcwNQYJKoZIhvcNAQkBFih0aS5zZWd1cmFuY2EuaW5mb3JtYWNhb0B2aWF2YXJlam8uY29tLmJyMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqObNb7KAP09WsV9h76Dw3tj2qa3l97K+slfzLkOBvi0xjacuKCnvsMSGEBosvWY/qNmSLE1YaoyFt7ZaeOiALKh2AFckJRM+/zvQzqi6cPnW0cGsEE/9WO48Fgh894pKjHpukATFb9tBYGTBEW46AH2WiAR735KEnDfFAHG//pkLKriPWEZBr9tf4gdNvyJ/ybs5JrBRU1RKE9MM7qnMkCouKTPwY/lS/2Xb1IYkyZulCf3Uyl7zpB6hQUhprS1R5meRocpGgHJCFfiWD/uXa5nREuGuQxcImwzvf+enwT6CooRoM2rN6IQWSY+uQ64dhSt4FMajZFmHVpLfUIOjEwIDAQABo1AwTjAdBgNVHQ4EFgQUZ22K62aMm/lI5LfblgINPvz8ae8wHwYDVR0jBBgwFoAUZ22K62aMm/lI5LfblgINPvz8ae8wDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQUFAAOCAQEAj23IDXLPkQpFDbgAtgKuO9N66o61edbJ1+BMjdSsfO0vMVpmBDlKdinxlh509/qJm/WLYswKkKOi7VHojBSV5HyrO5YGCSJFvVGJqF4JUxy7GrWTHqgwcylmX5B5lNd5aMIxwG6AF4o2cp6IPe+Uwaroa8kLTrtM0eRgAInHbQA7MXbvOZY+pzE4s6jFbA1O321zVg4C4Y3C4e30yf9YJNK5XjUP26duvwGqQrZg49ZU3W/t6GYY1kQhSeBG0FPg2GOIHX03WPZpaJ7i1uCv6Ial07pxDxqcT8oCJalY9tW9sv7zBJRaJgTIf5oz5jElb9kWd2D6XwaGB5PJfD6CTQ==";
+	private static final String CHAVE_PUBLICA_DEFAULT = "MIIENTCCAx2gAwIBAgIJAJ5ApEGl2oaIMA0GCSqGSIb3DQEBBQUAMIGwMQswCQYDVQQGEwJCUjELMAkGA1UECAwCU1AxFDASBgNVBAcMC1NBTyBDQUVUQU5PMRMwEQYDVQQKDApWSUEgVkFSRUpPMSAwHgYDVQQLDBdTRUdVUkFOQ0EgREEgSU5GT1JNQUNBTzEOMAwGA1UEAwwFUFJPWFkxNzA1BgkqhkiG9w0BCQEWKHRpLnNlZ3VyYW5jYS5pbmZvcm1hY2FvQHZpYXZhcmVqby5jb20uYnIwHhcNMTgwODE2MTIzNjQ2WhcNMjEwODE1MTIzNjQ2WjCBsDELMAkGA1UEBhMCQlIxCzAJBgNVBAgMAlNQMRQwEgYDVQQHDAtTQU8gQ0FFVEFOTzETMBEGA1UECgwKVklBIFZBUkVKTzEgMB4GA1UECwwXU0VHVVJBTkNBIERBIElORk9STUFDQU8xDjAMBgNVBAMMBVBST1hZMTcwNQYJKoZIhvcNAQkBFih0aS5zZWd1cmFuY2EuaW5mb3JtYWNhb0B2aWF2YXJlam8uY29tLmJyMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqObNb7KAP09WsV9h76Dw3tj2qa3l97K+slfzLkOBvi0xjacuKCnvsMSGEBosvWY/qNmSLE1YaoyFt7ZaeOiALKh2AFckJRM+/zvQzqi6cPnW0cGsEE/9WO48Fgh894pKjHpukATFb9tBYGTBEW46AH2WiAR735KEnDfFAHG//pkLKriPWEZBr9tf4gdNvyJ/ybs5JrBRU1RKE9MM7qnMkCouKTPwY/lS/2Xb1IYkyZulCf3Uyl7zpB6hQUhprS1R5meRocpGgHJCFfiWD/uXa5nREuGuQxcImwzvf+enwT6CooRoM2rN6IQWSY+uQ64dhSt4FMajZFmHVpLfUIOjEwIDAQABo1AwTjAdBgNVHQ4EFgQUZ22K62aMm/lI5LfblgINPvz8ae8wHwYDVR0jBBgwFoAUZ22K62aMm/lI5LfblgINPvz8ae8wDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQUFAAOCAQEAj23IDXLPkQpFDbgAtgKuO9N66o61edbJ1+BMjdSsfO0vMVpmBDlKdinxlh509/qJm/WLYswKkKOi7VHojBSV5HyrO5YGCSJFvVGJqF4JUxy7GrWTHqgwcylmX5B5lNd5aMIxwG6AF4o2cp6IPe+Uwaroa8kLTrtM0eRgAInHbQA7MXbvOZY+pzE4s6jFbA1O321zVg4C4Y3C4e30yf9YJNK5XjUP26duvwGqQrZg49ZU3W/t6GYY1kQhSeBG0FPg2GOIHX03WPZpaJ7i1uCv6Ial07pxDxqcT8oCJalY9tW9sv7zBJRaJgTIf5oz5jElb9kWd2D6XwaGB5PJfD6CTQ==";
 
 	/** Atributo auxiliar para os testes de criacao de pedido. */
 	private static DadosCartaoHelper dadosCartaoHelper;
 
-	Gson gson = new GsonBuilder().setPrettyPrinting().create();
+	private Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
 	@BeforeAll
 	public static void init() {
+		// Obtem a chave public de um servico
+		String publicKey = null;
+		try {
+			publicKey = getChavePublica();
+		} catch (ApiException e) {
+			printErrorApi(e, " init()");
+		}
 		pedidoApi = new PedidoApi();
-		dadosCartaoHelper = new DadosCartaoHelper(new Encryptor(CHAVE_PUBLICA), "Jose da Silva", NUMERO_CARTAO_MASTER,
-				"1234", "2045", "12");
+		dadosCartaoHelper = new DadosCartaoHelper(new Encryptor(publicKey), "Jose da Silva", NUMERO_CARTAO_MASTER,
+				CODIGO_VERIFICADOR, ANO_VALIDADE, MES_VALIDADE);
 	}
 
 	@Test
@@ -191,7 +202,7 @@ class PedidoApiTest {
 			Assert.assertTrue(calculoCarrinho.getData().getProdutos().get(0).getValorTotalFrete() > 0.0);;
 
 			// preparacao do objeto que sera utilizado nos demais testes
-			pedidoHelperComCartao = preparePedido(calculoCarrinho);
+			pedidoComCartaoHelper = preparePedido(calculoCarrinho);
 
 		} catch (ApiException e) {
 			fail(printErrorApi(e, "testPostCalcularCarrinhoParaCriacaoPedidoComCartao"));
@@ -223,8 +234,8 @@ class PedidoApiTest {
 		enderecoEntrega.setBairro("bairro se");
 		enderecoEntrega.setComplemento("teste");
 		enderecoEntrega.setTelefone("22333333");
-		enderecoEntrega.setTelefone("22333335");
-		enderecoEntrega.setTelefone("22333336");
+		enderecoEntrega.setTelefone2("22333335");
+		enderecoEntrega.setTelefone3("22333336");
 
 		// destinatario
 		DestinatarioDto destinatario = new DestinatarioDto();
@@ -279,9 +290,9 @@ class PedidoApiTest {
 		// Produto
 		PedidoProdutoDto produto = new PedidoProdutoDto();
 		produto.setIdLojista(ID_LOJISTA);
-		produto.setCodigo(pedidoHelperComCartao.getIdSku());
+		produto.setCodigo(pedidoComCartaoHelper.getIdSku());
 		produto.setQuantidade(1);
-		produto.setPrecoVenda(pedidoHelperComCartao.getPrecoVenda());
+		produto.setPrecoVenda(pedidoComCartaoHelper.getPrecoVenda());
 		List<PedidoProdutoDto> produtos = Arrays.asList(produto);
 
 		// endereco Entrega
@@ -295,8 +306,8 @@ class PedidoApiTest {
 		enderecoEntrega.setBairro("bairro se");
 		enderecoEntrega.setComplemento("teste");
 		enderecoEntrega.setTelefone("22333333");
-		enderecoEntrega.setTelefone("22333335");
-		enderecoEntrega.setTelefone("22333336");
+		enderecoEntrega.setTelefone2("22333335");
+		enderecoEntrega.setTelefone3("22333336");
 
 		// destinatario
 		DestinatarioDto destinatario = new DestinatarioDto();
@@ -309,7 +320,7 @@ class PedidoApiTest {
 		pedido.setCampanha(ID_CAMPANHA);
 		pedido.setCnpj(CNPJ);
 		pedido.setPedidoParceiro(geraPedidoParceiroId());
-		pedido.setValorFrete(pedidoHelperComCartao.getValorFrete());
+		pedido.setValorFrete(pedidoComCartaoHelper.getValorFrete());
 		pedido.setAguardarConfirmacao(true);
 		pedido.setOptantePeloSimples(true);
 		pedido.setPossuiPagtoComplementar(true);
@@ -346,7 +357,7 @@ class PedidoApiTest {
 
 		// dados entrega
 		EntregaDadosDto dadosEntrega = new EntregaDadosDto();
-		dadosEntrega.setValorFrete(pedidoHelperComCartao.getValorFrete());
+		dadosEntrega.setValorFrete(pedidoComCartaoHelper.getValorFrete());
 
 		// endereco cobranca
 		EnderecoCobrancaDto enderecoCobranca = new EnderecoCobrancaDto();
@@ -359,8 +370,8 @@ class PedidoApiTest {
 		enderecoCobranca.setBairro("Vila Teodoro");
 		enderecoCobranca.setComplemento("teste");
 		enderecoCobranca.setTelefone("22333333");
-		enderecoCobranca.setTelefone("22333335");
-		enderecoCobranca.setTelefone("22333336");
+		enderecoCobranca.setTelefone2("22333335");
+		enderecoCobranca.setTelefone3("22333336");
 
 		pedido.setProdutos(produtos);
 		pedido.setEnderecoEntrega(enderecoEntrega);
@@ -368,7 +379,7 @@ class PedidoApiTest {
 		pedido.setDadosEntrega(dadosEntrega);
 		pedido.setEnderecoCobranca(enderecoCobranca);
 		pedido.setPagtosComplementares(Arrays.asList(pagamentoComplementarDto));
-		pedido.setValorTotalPedido(pedidoHelperComCartao.getTotalPedido());
+		pedido.setValorTotalPedido(pedidoComCartaoHelper.getTotalPedido());
 		pedido.setValorTotalComplementar(30.0);
 		pedido.setValorTotalComplementarComJuros(30.0);
 		
@@ -382,12 +393,12 @@ class PedidoApiTest {
 			System.out.println("\nResponse:");
 			System.out.println(gson.toJson(criacaoPedidoDTO));
 
-			double valueExpected = pedidoHelperComCartao.getTotalPedido();
+			double valueExpected = pedidoComCartaoHelper.getTotalPedido();
 			Assert.assertEquals(valueExpected, criacaoPedidoDTO.getData().getValorTotalPedido(), 0);
 
 			// complementa dados do Pedido para utilizar nos outros metodos
-			pedidoHelperComCartao.setIdPedido(criacaoPedidoDTO.getData().getCodigoPedido());
-			pedidoHelperComCartao.setIdPedidoParceiro(criacaoPedidoDTO.getData().getPedidoParceiro());
+			pedidoComCartaoHelper.setIdPedido(criacaoPedidoDTO.getData().getCodigoPedido());
+			pedidoComCartaoHelper.setIdPedidoParceiro(criacaoPedidoDTO.getData().getPedidoParceiro());
 
 		} catch (ApiException e) {
 			fail(printErrorApi(e, "testPostCriarPedidoPagCartao"));
@@ -433,11 +444,11 @@ class PedidoApiTest {
 	@Order(6)
 	void testPatchPedidosConfirmacao() {
 		Map<String, String> variableParams = new HashMap<>();
-		variableParams.put("idCompra", pedidoHelperComCartao.getIdPedido().toString());
+		variableParams.put("idCompra", pedidoComCartaoHelper.getIdPedido().toString());
 
 		ConfirmacaoReqDTO dto = new ConfirmacaoReqDTO();
 		dto.setIdCampanha(ID_CAMPANHA);
-		dto.setIdPedidoParceiro(pedidoHelperComCartao.getIdPedidoParceiro());
+		dto.setIdPedidoParceiro(pedidoComCartaoHelper.getIdPedidoParceiro());
 		dto.setConfirmado(true);
 
 		System.out.println("\nRequest:");
@@ -511,9 +522,7 @@ class PedidoApiTest {
 			queryParams.put("request.cnpj", CNPJ);
 			queryParams.put("request.idCampanha", String.valueOf(ID_CAMPANHA));
 			queryParams.put("request.idPedidoParceiro", pedidoHelper.getIdPedidoParceiro().toString());
-			PedidoParceiroData pedido;
-			pedido = pedidoApi.getDadosPedidoParceiro(null, queryParams);
-
+			pedidoApi.getDadosPedidoParceiro(null, queryParams);
 		});
 	}
 
@@ -531,7 +540,7 @@ class PedidoApiTest {
 		Assertions.assertThrows(ApiException.class, () -> {
 			ConfirmacaoReqDTO dto = new ConfirmacaoReqDTO();
 			dto.setIdCampanha(ID_CAMPANHA);
-			dto.setIdPedidoParceiro(pedidoHelperComCartao.getIdPedidoParceiro());
+			dto.setIdPedidoParceiro(pedidoComCartaoHelper.getIdPedidoParceiro());
 			dto.setConfirmado(true);
 
 			pedidoApi.patchPedidosCancelamentoOrConfirmacao(dto, null);
@@ -543,7 +552,7 @@ class PedidoApiTest {
 	public void testPatchPedidosConfirmacaoFail() {
 		Assertions.assertThrows(ApiException.class, () -> {
 			Map<String, String> variableParams = new HashMap<>();
-			variableParams.put("idCompra", pedidoHelperComCartao.getIdPedido().toString());
+			variableParams.put("idCompra", pedidoComCartaoHelper.getIdPedido().toString());
 
 			pedidoApi.patchPedidosCancelamentoOrConfirmacao(null, variableParams);
 		});
@@ -565,7 +574,7 @@ class PedidoApiTest {
 		});
 	}
 
-	private String printErrorApi(ApiException e, String method) {
+	private static String printErrorApi(ApiException e, String method) {
 		return String.format(
 				"Falha. Uma exceção ApiException não deveria ser lançada!\nApiException %s \nCode: %s \nMessage: %s \nBody: %s \nHeaders: %s",
 				method, e.getCode(), e.getMessage(), e.getResponseBody(), e.getResponseHeaders());
@@ -583,6 +592,18 @@ class PedidoApiTest {
 		int idPedidoParceiro = new Random().nextInt(65536);
 		idPedidoParceiro = idPedidoParceiro < 0 ? idPedidoParceiro * -1 : idPedidoParceiro;
 		return idPedidoParceiro;
+	}
+
+	private static String getChavePublica() throws ApiException {
+		SegurancaApi api = new SegurancaApi();
+
+		ChaveDTO dto = api.getChave();
+		if (dto.getData() != null) {
+			return dto.getData().getChavePublica();
+		}
+
+		return CHAVE_PUBLICA_DEFAULT;
+
 	}
 
 	/**
