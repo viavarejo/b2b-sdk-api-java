@@ -32,6 +32,7 @@ public class ProdutoApiTest {
 			System.out.println("Response:");
 			System.out.println(gson.toJson(dadosProduto));
 			assertNotNull(dadosProduto);
+			assertNotNull(dadosProduto.getData());
 			assertEquals("Bola de Natal Santini Christmas 10cm Transparente - 3 Unidades.", dadosProduto.getData().getNome());
 			assertEquals("http://imagens.extra.com.br/Control/ArquivoExibir.aspx?IdArquivo=253172122", dadosProduto.getData().getImagem());
 			assertEquals(2868, dadosProduto.getData().getCategoria());
@@ -71,6 +72,7 @@ public class ProdutoApiTest {
 			System.out.println("Response:");
 			System.out.println(gson.toJson(dadosProdutoCampanha));
 			assertNotNull(dadosProdutoCampanha);
+			assertNotNull(dadosProdutoCampanha.getData());
 			assertEquals("Bola de Natal Santini Christmas 10cm Transparente - 3 Unidades.", dadosProdutoCampanha.getData().getNome());
 			assertEquals("http://imagens.extra.com.br/Control/ArquivoExibir.aspx?IdArquivo=253172122", dadosProdutoCampanha.getData().getImagem());
 			assertEquals(2868, dadosProdutoCampanha.getData().getCategoria());

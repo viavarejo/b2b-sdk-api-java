@@ -30,6 +30,10 @@ public class RequestUtil<T1 extends Serializable, T2 extends Serializable> imple
 		this.accessToken = new PropsReaderUtil().getToken();
 	}
 
+	public Response getDownLoad(String path) throws ApiException {
+		return this.doGet(path, null);
+	}
+
 	public T2 get(String path) throws ApiException {
 		return this.get(path, null);
 	}

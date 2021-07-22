@@ -14,6 +14,10 @@ public class PropsReaderUtil {
 		return getSingleProp("host");
 	}
 
+	public String getHostMock() {
+		return getSingleProp("host.mock");
+	}
+
 	public String getToken() {
 		return getSingleProp("token");
 	}

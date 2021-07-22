@@ -1,6 +1,14 @@
 package br.com.via.api;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.Date;
 import java.util.Map;
+
+import javax.ws.rs.core.Response;
 
 import br.com.via.api.client.ApiException;
 import br.com.via.api.client.PropsReaderUtil;
@@ -25,9 +33,11 @@ public class PedidoApi {
 	private RequestUtil<CriacaoPedidoRequest, CriacaoPedidoDTO> requestUtilCriacaoPedido;
 
 	private final String basePath;
+	private final String basePathMock;
 
 	public PedidoApi() {
 		this.basePath = new PropsReaderUtil().getHost();
+		this.basePathMock = new PropsReaderUtil().getHostMock();
 		requestUtilPedidoCarrinho = new RequestUtil<>(CalculoCarrinho.class);
 		requestUtilPedidoParceiro = new RequestUtil<>(PedidoParceiroData.class);
 		requestUtilConfirmacaoReqDTO = new RequestUtil<>(ConfirmacaoDTO.class);
@@ -81,16 +91,27 @@ public class PedidoApi {
 		return requestUtilConfirmacaoReqDTO.patch(path, confirmacaoPedido);
 	}
 
-	public String getNotaFiscalPedido(Map<String, String> pathParams) throws ApiException {
+	public String getNotaFiscalPedido(Map<String, String> pathParams) throws ApiException, IOException {
 		// verify the required parameter
 		if (pathParams == null) {
 			throw new ApiException(400, "Missing the required parameter 'pathParams'");
 		}
 		// create path and map variables
-		String path = basePath + String.format("/pedidos/%s/entregas/%s/nfe/%s", pathParams.get("idCompra"),
+		String uri = null;
+		if (basePathMock != null && !basePathMock.isEmpty()) {
+			uri = basePathMock;
+		} else {
+			uri = basePath;
+		}
+		uri += String.format("/pedidos/%s/entregas/%s/nfe/%s", pathParams.get("idCompra"),
 				pathParams.get("idCompraEntrega"), pathParams.get("formato"));
 
-		return requestUtilNotaFiscalPedido.get(path, pathParams);
+		Response response = requestUtilNotaFiscalPedido.getDownLoad(uri);
+		InputStream in = response.readEntity(InputStream.class);
+		Date date = new Date();
+		String outFile = "NF_" + date.getTime() + ".PDF";
+		Files.copy(in, Paths.get(outFile), StandardCopyOption.REPLACE_EXISTING);
+		return outFile;
 	}
 
 	public CriacaoPedidoDTO postCriarPedido(CriacaoPedidoRequest pedido) throws ApiException {

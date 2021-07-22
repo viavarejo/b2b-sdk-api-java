@@ -2,6 +2,7 @@ package br.com.via.api;
 
 import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -502,10 +503,12 @@ class PedidoApiTest {
 		pathParams.put("idCompraEntrega", "91712686");
 		pathParams.put("formato", "PDF");
 
-		String response;
+		String nomeArquivo;
 		try {
-			response = pedidoApi.getNotaFiscalPedido(pathParams);
-			Assert.assertNotNull("Response nulo", response);
+			nomeArquivo = pedidoApi.getNotaFiscalPedido(pathParams);
+			Assert.assertNotNull(nomeArquivo);
+			File f = new File(nomeArquivo);
+			Assert.assertTrue(f.exists());
 		} catch (ApiException e) {
 			fail(printErrorApi(e, "testGetNotaFiscalPedidoPdf"));
 		} catch (Exception e) {
