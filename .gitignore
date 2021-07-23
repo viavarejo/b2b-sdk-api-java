@@ -12,3 +12,6 @@
 
 *.iml
 *.idea
+
+NF_*.pdf
+NF_*.xml
