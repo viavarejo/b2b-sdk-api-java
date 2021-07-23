@@ -109,7 +109,12 @@ public class PedidoApi {
 		Response response = requestUtilNotaFiscalPedido.getDownLoad(uri);
 		InputStream in = response.readEntity(InputStream.class);
 		Date date = new Date();
-		String outFile = "NF_" + date.getTime() + ".PDF";
+		String outFile = "";
+		if (pathParams.get("formato").equalsIgnoreCase("PDF")) {
+			outFile = "NF_" + date.getTime() + ".PDF";
+		} else {
+			outFile = "NF_" + date.getTime() + ".XML";
+		}
 		Files.copy(in, Paths.get(outFile), StandardCopyOption.REPLACE_EXISTING);
 		return outFile;
 	}

@@ -577,6 +577,26 @@ class PedidoApiTest {
 		});
 	}
 
+	@Test
+	void testGetNotaFiscalPedidoXml() {
+		Map<String, String> pathParams = new HashMap<>();
+		pathParams.put("idCompra", "247473612");
+		pathParams.put("idCompraEntrega", "91712686");
+		pathParams.put("formato", "XML");
+
+		String nomeArquivo;
+		try {
+			nomeArquivo = pedidoApi.getNotaFiscalPedido(pathParams);
+			Assert.assertNotNull(nomeArquivo);
+			File f = new File(nomeArquivo);
+			Assert.assertTrue(f.exists());
+		} catch (ApiException e) {
+			fail(printErrorApi(e, "testGetNotaFiscalPedidoXml"));
+		} catch (Exception e) {
+			fail("Falha. Uma exceção não deveria ser lançada!\n" + e.getMessage());
+		}
+	}
+
 	private static String printErrorApi(ApiException e, String method) {
 		return String.format(
 				"Falha. Uma exceção ApiException não deveria ser lançada!\nApiException %s \nCode: %s \nMessage: %s \nBody: %s \nHeaders: %s",
